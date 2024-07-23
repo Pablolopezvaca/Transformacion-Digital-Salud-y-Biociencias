@@ -1,0 +1,21 @@
+---
+title: "PATRONES DE RECURRENCIA BASADOS EN LAS ETAPAS DEL TUMOR CEREBRAL"
+author: "Pablo López Vaca"
+date: "2024-06-12"
+output: html_document
+---
+```{r}
+## Este dataset se centra en la investigación de los tumores cerebrales, su progresión y las estrategias de tratamiento.
+```
+
+```{r}
+# Cargar las librerías necesarias
+install.packages("dplyr")
+install.packages("factoextra")
+library(dplyr)
+library(ggplot2)
+library(survival)
+library(cluster)
+library(factoextra)
+```
+

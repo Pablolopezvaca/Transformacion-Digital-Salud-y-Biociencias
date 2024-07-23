@@ -1,0 +1,470 @@
+---
+title: "Housing"
+author: "Amaia Telleria"
+date: "2024-05-28"
+output: html_document
+---
+```{r}
+# Install and load necessary packages
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+```
+
+Cargar los datos
+```{r}
+# Load the data from a CSV file named "Housing.csv"
+housing_data <- read.csv("Housing.csv")
+
+# View the first few rows of the dataset to confirm it's loaded correctly
+head(housing_data)
+
+```
+Summary datos sin caracteristicas asignadas
+```{r}
+summary(housing_data)
+```
+Matriz de correlacion sin caracteristicas asignadas
+```{r}
+# Install and load necessary packages
+if (!requireNamespace("corrplot", quietly = TRUE)) {
+    install.packages("corrplot")
+}
+library(corrplot)
+
+# Assuming housing_data is your dataframe
+# Select only numeric variables
+numeric_data <- housing_data %>% select(where(is.numeric))
+
+# Calculate the correlation matrix
+cor_matrix <- cor(numeric_data, use = "pairwise.complete.obs")  # handling NAs appropriately
+
+# Visualize the correlation matrix with numeric values
+corrplot(cor_matrix, method = "number", type = "upper", order = "hclust",
+         tl.col = "black", tl.srt = 45,  # Text label options
+         addCoef.col = "red")  # Color of the correlation coefficients
+
+
+```
+
+En R, la diferencia principal entre los tipos de datos entero, numérico y factor radica en cómo representan y manejan los datos, así como en su uso previsto:
+
+### Entero
+
+- **Definición**: El tipo de dato entero representa números enteros sin puntos decimales.
+- **Uso**: Normalmente se utiliza para conteos, índices o cualquier dato que naturalmente se clasifique como números enteros.
+- **Operaciones**: Soporta operaciones aritméticas y se puede usar en cálculos matemáticos.
+- **Ejemplo**: `1`, `42`, `-5`
+
+### Numérico
+
+- **Definición**: El tipo de dato numérico (también conocido como doble o real) representa números que pueden contener puntos decimales.
+- **Uso**: Se utiliza para datos continuos, mediciones y cualquier dato que requiera precisión decimal.
+- **Operaciones**: Soporta operaciones aritméticas, funciones matemáticas y es adecuado para análisis estadístico.
+- **Ejemplo**: `3.14`, `-0.001`, `100.0`
+
+### Factor
+
+- **Definición**: El tipo de dato factor representa datos categóricos y los almacena como enteros con niveles correspondientes.
+- **Uso**: Se utiliza para variables categóricas que tienen un número fijo de valores distintos o niveles, como etiquetas, categorías o clasificaciones.
+- **Operaciones**: Adecuado para modelado estadístico, especialmente en modelos de regresión y análisis de varianza, donde los datos categóricos necesitan ser codificados como factores.
+- **Ejemplo**: `factor(c("bajo", "medio", "alto"))` donde `bajo`, `medio` y `alto` son los niveles.
+
+### Comparación Detallada
+
+#### Entero vs Numérico
+- **Almacenamiento**: Los enteros se almacenan como números enteros, mientras que los numéricos pueden almacenar tanto números enteros como decimales.
+- **Precisión**: Los numéricos se utilizan cuando es necesaria la precisión con puntos decimales, mientras que los enteros se utilizan para números enteros exactos.
+- **Ejemplo de Uso**: 
+  - Entero: Contar elementos (e.g., número de dormitorios).
+  - Numérico: Medir cantidades (e.g., precio, área).
+
+#### Numérico vs Factor
+- **Naturaleza de los Datos**: Los numéricos se utilizan para datos continuos, mientras que los factores se utilizan para datos categóricos.
+- **Operaciones**: Los numéricos permiten operaciones aritméticas, mientras que los factores se utilizan para agrupación y clasificación.
+- **Ejemplo de Uso**: 
+  - Numérico: `100.5`, `3.14` (datos continuos como mediciones).
+  - Factor: `"Masculino"`, `"Femenino"` (categorías para agrupación).
+
+#### Entero vs Factor
+- **Naturaleza de los Datos**: Los enteros son valores numéricos utilizados para conteo, mientras que los factores representan datos categóricos.
+- **Operaciones**: Los enteros pueden ser utilizados en cálculos matemáticos, mientras que los factores se utilizan para agrupación y clasificación.
+- **Ejemplo de Uso**: 
+  - Entero: `3`, `5`, `7` (datos discretos como conteos).
+  - Factor: `"bajo"`, `"medio"`, `"alto"` (categorías con niveles).
+
+Caracteristicas asignadas
+```{r}
+# Load necessary library
+library(dplyr)
+
+
+# Convert each column to the appropriate data type
+housing_data <- housing_data %>%
+  mutate(
+    price = as.numeric(price),                      # Numeric
+    area = as.numeric(area),                        # Numeric
+    bedrooms = as.integer(bedrooms),                # Discrete Numeric
+    bathrooms = as.integer(bathrooms),              # Discrete Numeric
+    stories = as.integer(stories),                  # Discrete Numeric
+    mainroad = factor(mainroad, levels = c("no", "yes")),  # Categorical (Yes/No)
+    guestroom = factor(guestroom, levels = c("no", "yes")), # Categorical (Yes/No)
+    basement = factor(basement, levels = c("no", "yes")),   # Categorical (Yes/No)
+    hotwaterheating = factor(hotwaterheating, levels = c("no", "yes")), # Categorical (Yes/No)
+    airconditioning = factor(airconditioning, levels = c("no", "yes")), # Categorical (Yes/No)
+    parking = as.integer(parking),                  # Discrete Numeric
+    prefarea = factor(prefarea, levels = c("no", "yes")), # Categorical (Yes/No)
+    furnishingstatus = factor(furnishingstatus, levels = c("unfurnished", "semi-furnished", "furnished")) # Categorical (Label)
+  )
+
+summary(housing_data)
+```
+
+```{r}
+# Install and load necessary packages
+if (!requireNamespace("corrplot", quietly = TRUE)) {
+    install.packages("corrplot")
+}
+library(corrplot)
+
+# Assuming housing_data is your dataframe
+# Select only numeric variables
+numeric_data <- housing_data %>% select(where(is.numeric))
+
+# Calculate the correlation matrix
+cor_matrix <- cor(numeric_data, use = "pairwise.complete.obs")  # handling NAs appropriately
+
+# Visualize the correlation matrix with numeric values
+corrplot(cor_matrix, method = "number", type = "upper", order = "hclust",
+         tl.col = "black", tl.srt = 45,  # Text label options
+         addCoef.col = "red")  # Color of the correlation coefficients
+
+
+```
+Caracteristicas asignadas como factores
+```{r}
+# Load necessary library
+library(dplyr)
+
+
+# Convert each column to the appropriate data type
+housing_data <- housing_data %>%
+  mutate(
+    price = as.numeric(price),                      # Numeric
+    area = as.numeric(area),                        # Numeric
+    bedrooms = as.factor(bedrooms),                # Discrete Numeric
+    bathrooms = as.factor(bathrooms),              # Discrete Numeric
+    stories = as.factor(stories),                  # Discrete Numeric
+    mainroad = factor(mainroad, levels = c("no", "yes")),  # Categorical (Yes/No)
+    guestroom = factor(guestroom, levels = c("no", "yes")), # Categorical (Yes/No)
+    basement = factor(basement, levels = c("no", "yes")),   # Categorical (Yes/No)
+    hotwaterheating = factor(hotwaterheating, levels = c("no", "yes")), # Categorical (Yes/No)
+    airconditioning = factor(airconditioning, levels = c("no", "yes")), # Categorical (Yes/No)
+    parking = as.factor(parking),                  # Discrete Numeric
+    prefarea = factor(prefarea, levels = c("no", "yes")), # Categorical (Yes/No)
+    furnishingstatus = factor(furnishingstatus, levels = c("unfurnished", "semi-furnished", "furnished")) # Categorical (Label)
+  )
+
+summary(housing_data)
+```
+```{r}
+# Install and load necessary packages
+if (!requireNamespace("corrplot", quietly = TRUE)) {
+    install.packages("corrplot")
+}
+library(corrplot)
+
+# Assuming housing_data is your dataframe
+# Select only numeric variables
+numeric_data <- housing_data %>% select(where(is.numeric))
+
+# Calculate the correlation matrix
+cor_matrix <- cor(numeric_data, use = "pairwise.complete.obs")  # handling NAs appropriately
+
+print(cor_matrix)
+
+# Visualize the correlation matrix with numeric values
+corrplot(cor_matrix, method = "number", type = "upper", order = "hclust",
+         tl.col = "black", tl.srt = 45,  # Text label options
+         addCoef.col = "red")  # Color of the correlation coefficients
+
+
+```
+
+Boxplots de todas las caracteristicas respecto a el precio
+```{r}
+# Load necessary libraries
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    install.packages("ggplot2")
+}
+library(ggplot2)
+library(dplyr)
+
+non_numeric_columns <- housing_data %>%
+  select(where(~ !is.numeric(.)))
+
+# Create a function to plot boxplots for non-numeric columns against price
+create_boxplots <- function(data, non_numeric_cols, numeric_col) {
+  for (col in names(non_numeric_cols)) {
+    p <- ggplot(data, aes_string(x = col, y = numeric_col, fill = col)) +
+      geom_boxplot() +
+      labs(title = paste("Boxplot of Price vs", col), x = col, y = numeric_col) +
+      theme_minimal() +
+      scale_fill_brewer(palette = "Pastel1") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    print(p)
+  }
+}
+
+# Call the function to create boxplots
+create_boxplots(housing_data, non_numeric_columns, "price")
+
+```
+Grafico de puntos de correlacion entre area y precio con cada caracteristica representada
+```{r}
+# Install and load necessary libraries
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    install.packages("ggplot2")
+}
+
+library(ggplot2)
+library(dplyr)
+
+
+
+# Identify non-numeric columns (excluding 'price' and 'area')
+non_numeric_columns <- housing_data %>%
+  select(where(~ !is.numeric(.))) 
+
+# Create a function to plot scatter plots with color based on factor variables
+create_scatter_plots <- function(data, non_numeric_cols, x_col, y_col) {
+  for (col in names(non_numeric_cols)) {
+    p <- ggplot(data, aes_string(x = x_col, y = y_col, color = col)) +
+      geom_smooth(method = "lm", se = FALSE, color = "grey")  +  # Added grey color to trend line for clarity
+      geom_point() +
+      labs(title = paste("Scatter Plot of", y_col, "vs", x_col, "colored by", col),
+           x = x_col, y = y_col) +
+      theme_minimal()
+    print(p)
+  }
+}
+
+# Call the function to create scatter plots
+create_scatter_plots(housing_data, non_numeric_columns, "area", "price")
+
+```
+Conversion de todas las caracteristicas a formato numerico
+```{r}
+# Install and load necessary packages
+if (!requireNamespace("corrplot", quietly = TRUE)) {
+    install.packages("corrplot")
+}
+library(corrplot)
+
+housing_data <- housing_data %>%
+  mutate(
+    price = as.numeric(price),                      # Numeric
+    area = as.numeric(area),                        # Numeric
+    bedrooms = as.numeric(bedrooms),                # Numeric (treated as discrete numeric)
+    bathrooms = as.numeric(bathrooms),              # Numeric (treated as discrete numeric)
+    stories = as.numeric(stories),                  # Numeric (treated as discrete numeric)
+    mainroad = as.numeric(factor(mainroad, levels = c("no", "yes"))),  # Convert factor to numeric
+    guestroom = as.numeric(factor(guestroom, levels = c("no", "yes"))), # Convert factor to numeric
+    basement = as.numeric(factor(basement, levels = c("no", "yes"))),   # Convert factor to numeric
+    hotwaterheating = as.numeric(factor(hotwaterheating, levels = c("no", "yes"))), # Convert factor to numeric
+    airconditioning = as.numeric(factor(airconditioning, levels = c("no", "yes"))), # Convert factor to numeric
+    parking = as.numeric(parking),                  # Numeric (treated as discrete numeric)
+    prefarea = as.numeric(factor(prefarea, levels = c("no", "yes"))), # Convert factor to numeric
+    furnishingstatus = as.numeric(factor(furnishingstatus, levels = c("unfurnished", "semi-furnished", "furnished"))) # Convert factor to numeric
+  )
+
+# Display the updated dataframe structure
+str(housing_data)
+```
+
+```{r}
+# Install and load necessary packages
+if (!requireNamespace("corrplot", quietly = TRUE)) {
+    install.packages("corrplot")
+}
+library(corrplot)
+
+# Assuming housing_data is your dataframe
+# Select only numeric variables
+numeric_data <- housing_data %>% select(where(is.numeric))
+
+# Calculate the correlation matrix
+cor_matrix <- cor(numeric_data, use = "pairwise.complete.obs")  # handling NAs appropriately
+
+print(cor_matrix)
+
+# Visualize the correlation matrix with numeric values
+corrplot(cor_matrix, method = "number", type = "upper", order = "hclust",
+         tl.col = "black", tl.srt = 30,  # Text label options
+         addCoef.col = "red",  # Color of the correlation coefficients
+         number.cex = 1,     # Adjust the size of the numbers
+         tl.cex = 1,         # Adjust the size of the text labels
+         cl.cex = 1.2)         # Adjust the size of the color legend text
+
+```
+```{r}
+# Calculate the correlation matrix
+cor_matrix <- cor(housing_data, use = "pairwise.complete.obs")
+
+print(cor_matrix)
+```
+```{r}
+library(ggplot2)
+
+# Calculate and display R-squared for area vs price
+plot_area <- ggplot(housing_data, aes(x = area, y = price)) +
+  geom_point(color = "skyblue", size = 3) +  # Set color outside aes()
+  geom_smooth(method = "lm", se = FALSE, color = "grey")  +  # Added grey color to trend line for clarity
+  labs(title = "Area vs Price", x = "Area (sq ft)", y = "Price") +
+  theme_minimal()
+
+# Fit the linear model
+model_area <- lm(price ~ area, data = housing_data)
+
+# Calculate correlation coefficient
+correlation <- cor(housing_data$price, housing_data$area)
+
+# Extract coefficients
+intercept <- coef(model_area)[1]
+slope <- coef(model_area)[2]
+
+# Create annotation text
+eqn_text <- sprintf("y = %.2f * x + %.2f, R = %.2f", slope, intercept, correlation)
+
+# Add equation and correlation coefficient to the plot
+plot_area <- plot_area +
+  annotate("text", x = Inf, y = Inf, label = eqn_text, hjust = 1.1, vjust = 2, size = 4, color = "navy")
+
+# Display the plot
+print(plot_area)
+
+```
+
+Escala logaritmica
+```{r}
+library(ggplot2)
+
+# Log-transform the data for the model
+housing_data$log_price <- log(housing_data$price)
+housing_data$log_area <- log(housing_data$area)
+
+# Calculate and display the correlation coefficient for log(area) vs log(price)
+plot_area_log <- ggplot(housing_data, aes(x = area, y = price)) +
+  geom_point(color = "skyblue", size = 3) +  # Set color outside aes()
+  geom_smooth(method = "lm", se = FALSE, color = "grey")  +  # Added red color to trend line for clarity
+  labs(title = "Log-Log Plot of Area vs Price", x = "Area (log scale)", y = "Price (log scale)") +
+  scale_x_log10() +  # Logarithmic scale for x-axis
+  scale_y_log10() +  # Logarithmic scale for y-axis
+  theme_minimal()
+
+# Fit the linear model on log-transformed data
+model_area_log <- lm(log_price ~ log_area, data = housing_data)
+
+# Calculate correlation coefficient
+correlation_log <- cor(housing_data$log_price, housing_data$log_area)
+
+# Extract coefficients
+intercept_log <- coef(model_area_log)[1]
+slope_log <- coef(model_area_log)[2]
+
+# Create annotation text
+eqn_text_log <- sprintf("log(y) = %.2f * log(x) + %.2f, R = %.2f", slope_log, intercept_log, correlation_log)
+
+# Add equation and correlation coefficient to the plot
+plot_area_log <- plot_area_log +
+  annotate("text", x = Inf, y = Inf, label = eqn_text_log, hjust = 1.1, vjust = 2, size = 4, color = "navy")
+
+# Display the plot
+print(plot_area_log)
+
+```
+
+### Rango Intercuartílico (IQR)
+
+El Rango Intercuartílico (IQR) es una medida de dispersión estadística, que representa la amplitud de los datos. Se calcula como la diferencia entre el tercer cuartil (Q3) y el primer cuartil (Q1). Los cuartiles dividen un conjunto de datos ordenados en cuatro partes iguales.
+
+- **Q1 (Primer Cuartil)**: El percentil 25, lo que significa que el 25% de los datos está por debajo de este valor.
+- **Q3 (Tercer Cuartil)**: El percentil 75, lo que significa que el 75% de los datos está por debajo de este valor.
+
+**Fórmula**: IQR = Q3 - Q1
+
+**Uso del IQR**: El IQR se usa a menudo para detectar valores atípicos. Normalmente, cualquier punto de datos por debajo de Q1 - 1.5 * IQR o por encima de Q3 + 1.5 * IQR se considera un valor atípico.
+
+**Ejemplo de Cálculo**:
+Supongamos que tienes los siguientes datos: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+- Primer Cuartil (Q1): El percentil 25, que es 3.
+- Tercer Cuartil (Q3): El percentil 75, que es 8.
+- IQR = Q3 - Q1 = 8 - 3 = 5
+
+
+
+```{r}
+# Load necessary library
+library(dplyr)
+
+# Calculate IQR for price and area
+Q1_price <- quantile(housing_data$price, 0.25)
+Q3_price <- quantile(housing_data$price, 0.75)
+IQR_price <- Q3_price - Q1_price
+
+Q1_area <- quantile(housing_data$area, 0.25)
+Q3_area <- quantile(housing_data$area, 0.75)
+IQR_area <- Q3_area - Q1_area
+
+# Filter out outliers
+housing_data_filtered <- housing_data %>%
+  filter(price > (Q1_price - 1.5 * IQR_price) & price < (Q3_price + 1.5 * IQR_price)) %>%
+  filter(area > (Q1_area - 1.5 * IQR_area) & area < (Q3_area + 1.5 * IQR_area))
+
+```
+
+
+```{r}
+library(ggplot2)
+
+housing_data <- housing_data_filtered
+
+# Log-transform the data for the model
+housing_data$log_price <- log(housing_data$price)
+housing_data$log_area <- log(housing_data$area)
+
+# Calculate and display the correlation coefficient for log(area) vs log(price)
+plot_area_log <- ggplot(housing_data, aes(x = area, y = price)) +
+  geom_point(color = "skyblue", size = 3) +  # Set color outside aes()
+  geom_smooth(method = "lm", se = FALSE, color = "grey")  +  # Added red color to trend line for clarity
+  labs(title = "Log-Log Plot of Area vs Price", x = "Area (log scale)", y = "Price (log scale)") +
+  scale_x_log10() +  # Logarithmic scale for x-axis
+  scale_y_log10() +  # Logarithmic scale for y-axis
+  theme_minimal()
+
+# Fit the linear model on log-transformed data
+model_area_log <- lm(log_price ~ log_area, data = housing_data)
+
+# Calculate correlation coefficient
+correlation_log <- cor(housing_data$log_price, housing_data$log_area)
+
+# Extract coefficients
+intercept_log <- coef(model_area_log)[1]
+slope_log <- coef(model_area_log)[2]
+
+# Create annotation text
+eqn_text_log <- sprintf("log(y) = %.2f * log(x) + %.2f, R = %.2f", slope_log, intercept_log, correlation_log)
+
+# Add equation and correlation coefficient to the plot
+plot_area_log <- plot_area_log +
+  annotate("text", x = Inf, y = Inf, label = eqn_text_log, hjust = 1.1, vjust = 2, size = 4, color = "navy")
+
+# Display the plot
+print(plot_area_log)
+
+```
+
+
+
+

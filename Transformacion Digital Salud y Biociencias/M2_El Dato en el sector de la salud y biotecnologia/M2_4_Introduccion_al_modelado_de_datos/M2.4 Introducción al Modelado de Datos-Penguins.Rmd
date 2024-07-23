@@ -1,0 +1,200 @@
+---
+title: "Pinguinos"
+author: "Amaia Telleria"
+date: "2024-05-28"
+output: html_document
+---
+
+
+```{r}
+library(palmerpenguins)
+penguins <- penguins 
+```
+
+
+```{r}
+head(penguins)
+```
+```{r}
+summary(penguins)
+```
+Mostrar lineas con NA excepto sex
+
+```{r}
+# Load the necessary library
+library(dplyr)
+
+# Filter rows that have NAs in any columns except 'sex'
+rows_with_nas_except_sex <- penguins %>% 
+  filter(rowSums(is.na(select(., -sex))) > 0)
+
+# View the rows with NAs excluding those with NAs only in 'sex'
+print(rows_with_nas_except_sex)
+
+
+
+```
+
+Borrar estas lineas
+```{r}
+# Load the necessary library
+library(dplyr)
+
+# Remove rows that have NAs in any columns except 'sex'
+cleaned_penguins <- penguins %>% 
+  filter(rowSums(is.na(select(., -sex))) == 0)
+
+# View the cleaned dataset
+print(cleaned_penguins)
+```
+
+```{r}
+penguins <- cleaned_penguins
+```
+
+
+Visualizar por especies 
+```{r}
+library(ggplot2)
+
+cor_value <- cor(penguins$flipper_length_mm, penguins$body_mass_g, use = "complete.obs")
+
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(aes(color = species), size = 3) +  # Puntos coloreados por especie
+  geom_smooth(method = "lm", se = FALSE) +  # Línea de tendencia lineal sin intervalo de confianza
+  geom_text(aes(label = sprintf("Correlation: %.2f", cor_value)), 
+            x = Inf, y = Inf, hjust = 1.1, vjust = 1.1, size = 3, color = "grey") +
+  labs(title = "Correlación entre Longitud de Aleta y Peso",
+       x = "Longitud de Aleta (mm)",
+       y = "Peso  (g)") +
+  theme_minimal()
+
+```
+
+```{r}
+library(ggplot2)
+
+cor_value <- cor(penguins$bill_length_mm, penguins$body_mass_g, use = "complete.obs")
+
+ggplot(penguins, aes(x = bill_length_mm, y = body_mass_g)) +
+  geom_point(aes(color = species), size = 3) +  # Puntos coloreados por especie
+  geom_smooth(method = "lm", se = FALSE) +  # Línea de tendencia lineal sin intervalo de confianza
+  geom_text(aes(label = sprintf("Correlation: %.2f", cor_value)), 
+            x = Inf, y = Inf, hjust = 1.1, vjust = 1.1, size = 3, color = "grey") +
+  labs(title = "Correlación entre Longitud de Pico y Peso",
+       x = "Longitud de Pico (mm)",
+       y = "Peso  (g)") +
+  theme_minimal()
+```
+
+
+Matriz de Correlacion
+```{r}
+# Load the necessary library
+library(dplyr)
+
+# Clean the dataset by removing rows with NAs in any columns except 'sex'
+cleaned_penguins <- penguins %>%
+  filter(rowSums(is.na(select(., -sex))) == 0)
+
+# Selecting only numeric columns for correlation analysis
+numeric_data <- select(cleaned_penguins, bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g)
+
+# Calculate the correlation matrix
+correlation_matrix <- cor(numeric_data)
+
+# Print the cleaned dataset
+print(cleaned_penguins)
+
+# Print the correlation matrix
+print(correlation_matrix)
+
+```
+
+```{r}
+if (!requireNamespace("dplyr", quietly = TRUE)) {
+    install.packages("dplyr")
+}
+library(dplyr)
+
+# Asegúrate de que el paquete y el conjunto de datos están cargados
+library(palmerpenguins)
+data(penguins)
+
+# Seleccionar solo las variables numéricas
+numeric_data <- select(penguins, where(is.numeric))
+
+# Calcular la matriz de correlación
+cor_matrix <- cor(numeric_data, use = "pairwise.complete.obs")
+
+
+```
+
+
+```{r}
+# Cargar los paquetes necesarios
+if (!requireNamespace("dplyr", quietly = TRUE)) {
+    install.packages("dplyr")
+}
+library(dplyr)
+
+if (!requireNamespace("corrplot", quietly = TRUE)) {
+    install.packages("corrplot")
+}
+library(corrplot)
+
+# Cargar el conjunto de datos penguins
+data(penguins, package = "palmerpenguins")
+
+# Seleccionar solo las variables numéricas y excluir 'year'
+numeric_data <- penguins %>% 
+  select(where(is.numeric)) %>% 
+  select(-year)  # Excluye la columna 'year'
+
+# Calcular la matriz de correlación, manejando NAs de forma adecuada
+cor_matrix <- cor(numeric_data, use = "pairwise.complete.obs")
+
+# Visualizar la matriz de correlación
+corrplot(cor_matrix, method = "circle")
+
+
+```
+
+
+
+```{r}
+# Load necessary packages
+if (!requireNamespace("dplyr", quietly = TRUE)) {
+    install.packages("dplyr")
+}
+library(dplyr)
+
+if (!requireNamespace("corrplot", quietly = TRUE)) {
+    install.packages("corrplot")
+}
+library(corrplot)
+
+# Load the penguins dataset
+data(penguins, package = "palmerpenguins")
+
+# Select only numeric variables and exclude 'year'
+numeric_data <- penguins %>% 
+  select(where(is.numeric)) %>% 
+  select(-year)  # Exclude the 'year' column
+
+# Calculate the correlation matrix, handling NAs appropriately
+cor_matrix <- cor(numeric_data, use = "pairwise.complete.obs")
+
+# Visualize the correlation matrix
+corrplot(cor_matrix, method = "circle", type = "upper", order = "hclust", 
+         tl.col = "darkblue", tl.srt = 45,  # Text label options
+         addCoef.col = "grey", # Color of the correlation coefficients
+         number.cex = 0.8)      # Size of the correlation coefficients
+
+# Calculate the correlation matrix, handling NAs appropriately
+M <- cor(numeric_data, use = "pairwise.complete.obs")
+
+
+
+```
+

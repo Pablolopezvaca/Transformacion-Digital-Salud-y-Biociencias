@@ -1,0 +1,203 @@
+---
+title: "AirBnB"
+author: "Amaia Telleria"
+date: "2024-05-27"
+output: html_document
+---
+
+
+```{r}
+library(readxl)
+
+# Cargar el archivo de Excel
+Airbnb_barcelona <- read_excel("Airbnb_barcelona.xlsx")
+
+```
+
+
+Que tipos de alojamientos existen?
+
+```{r}
+
+
+# Cargar la biblioteca necesaria
+library(dplyr)
+library(stringr)
+
+# Suponiendo que tus datos están en un marco de datos llamado Airbnb_barcelona
+# Filtrar los valores numéricos que probablemente sean errores
+valid_room_types <- Airbnb_barcelona %>%
+  mutate(room_type = as.character(room_type)) %>% 
+  filter(!str_detect(room_type, "^[0-9]+$")) %>%  
+  pull(room_type) %>%                            
+  unique()                                      
+
+# Imprimir por consola los tipos validos de habitaciones 
+print(valid_room_types)
+
+
+```
+
+Contar y representar graficamente
+
+```{r}
+# Cargar las bibliotecas necesarias
+library(dplyr)
+library(ggplot2)
+library(stringr)
+
+# Filtrar los valores numéricos de la columna room_type para asegurar la integridad de los datos
+Airbnb_barcelona <- Airbnb_barcelona %>%
+  mutate(room_type = as.character(room_type)) %>%
+  filter(!str_detect(room_type, "^[0-9]+$"))
+
+# Contar las ocurrencias de cada tipo de habitación válido
+room_type_counts <- Airbnb_barcelona %>%
+  count(room_type, sort = TRUE)  
+
+# Imprimir por consola los tipos de habitaciones válidos y únicos
+print(room_type_counts)
+
+# Crear un histograma (gráfico de barras) para visualizar los conteos
+ggplot(room_type_counts, aes(x = room_type, y = n, fill = room_type)) +
+  geom_bar(stat = "identity", color = "black") +
+  theme_minimal() +
+  labs(x = "Room Type", y = "Count", title = "Histogram of Room Types") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+
+
+```
+La escal logaritmica
+```{r}
+# Cargar las bibliotecas necesarias
+library(dplyr)
+library(ggplot2)
+library(stringr)
+
+# Filtrar los valores numéricos de la columna room_type para asegurar la integridad de los datos
+Airbnb_barcelona <- Airbnb_barcelona %>%
+  mutate(room_type = as.character(room_type)) %>%
+  filter(!str_detect(room_type, "^[0-9]+$"))
+
+# Contar las ocurrencias de cada tipo de habitación válido
+room_type_counts <- Airbnb_barcelona %>%
+  count(room_type, sort = TRUE) 
+
+# Imprimir por consola los tipos de habitaciones válidos y únicos
+print(room_type_counts)
+
+# Crear un histograma (gráfico de barras) para visualizar los conteos con un eje y logarítmico
+ggplot(room_type_counts, aes(x = room_type, y = n, fill = room_type)) +
+  geom_bar(stat = "identity", color = "black") +
+  scale_y_log10() +  # Aplicando escala logarítmica al eje y
+  theme_minimal() +
+  labs(x = "Room Type", y = "Count (Log Scale)", title = "Histogram of Room Types on Log Scale") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+
+
+```
+
+Media Mediana
+
+```{r}
+# Cargar las bibliotecas necesarias
+library(dplyr)
+library(stringr)
+library(modeest)  # Este paquete se utiliza para calcular la moda
+
+
+# Asegúrate de que el precio se trate como numérico (suponiendo que podría estar siendo interpretado como caracter o factor)
+Airbnb_barcelona$price <- as.numeric(as.character(Airbnb_barcelona$price))
+
+# Filtrar los valores numéricos de la columna room_type para asegurar la integridad de los datos
+Airbnb_barcelona <- Airbnb_barcelona %>%
+  mutate(room_type = as.character(room_type)) %>%
+  filter(!str_detect(room_type, "^[0-9]+$"))
+
+# Calcular la mediana, la media y la moda para cada tipo de habitación
+room_type_stats <- Airbnb_barcelona %>%
+  group_by(room_type) %>%
+  summarise(
+    Mean = mean(price, na.rm = TRUE),  # Promedio del precio, se excluye valores NA
+    Median = median(price, na.rm = TRUE),  # Precio medio, se excluye valores NA 
+  )
+
+# Imprimir las estadisticas
+print(room_type_stats)
+
+
+```
+
+Boxplot
+
+```{r}
+# Cargar las librerias necesrias 
+library(ggplot2)
+library(dplyr)
+library(stringr)
+
+# Asegúrate de que los datos estén limpios y que el precio sea numérico
+Airbnb_barcelona$price <- as.numeric(as.character(Airbnb_barcelona$price))  # Convierte el precio a numérico si aún no lo es
+
+# Filtrar los valores numéricos de la columna room_type para garantizar la integridad de los datos
+Airbnb_barcelona <- Airbnb_barcelona %>%
+  mutate(room_type = as.character(room_type)) %>%
+  filter(!str_detect(room_type, "^[0-9]+$"))
+
+# Crear un diagrama de caja (boxplot) para el precio por tipo de habitación con un eje y logarítmico
+ggplot(Airbnb_barcelona, aes(x = room_type, y = price, fill = room_type)) +
+  geom_boxplot() +
+  scale_y_log10() +  # Escala logarítmica para el eje y
+  theme_minimal() +
+  labs(title = "Boxplot of Prices by Room Type (Log Scale)", x = "Room Type", y = "Price (Log Scale)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotar las etiquetas del eje x para mejorar la legibilidad
+        legend.position = "none")  # Eliminar la leyenda si no es necesaria
+
+
+```
+Correlacion entre bocplot y diagrama de barras
+```{r}
+# Cargar las librerias necesarias
+library(dplyr)
+library(ggplot2)
+
+# Filtrar datos para el tipo de habitación 'Entire home/apt' y asegurar que los precios sean numéricos y distintos de cero (log(0) no está definido).
+Airbnb_barcelona_filtered <- Airbnb_barcelona %>%
+  filter(room_type == "Entire home/apt") %>%
+  filter(is.numeric(price) & price > 0)
+
+# Crear un histograma de precios con escala logarítmica
+ggplot(Airbnb_barcelona_filtered, aes(x = price)) +
+  geom_histogram(bins = 30, fill = "blue", color = "black") +  # Adjust bins if necessary
+  scale_x_log10(labels = scales::comma) +  # Eje x logarítmico
+  scale_y_log10() +  # Eje y logarítmico
+  labs(title = "Log-Log Histogram of Prices for Entire Homes/Apartments",
+       x = "Price (Log Scale)",
+       y = "Frequency (Log Scale)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotar las etiquetas del eje x para mejorar la legibilidad
+
+```
+
+```{r}
+# Cargar las librerias necesarias
+library(dplyr)
+library(ggplot2)
+
+# Filtrar datos para el tipo de habitación 'Entire home/apt' y asegurarse de que los precios sean numéricos
+Airbnb_barcelona_filtered <- Airbnb_barcelona %>%
+  filter(room_type == "Hotel room") %>%
+  filter(is.numeric(price))
+
+# Crear un histograma de precios para 'Entire home/apt'
+ggplot(Airbnb_barcelona_filtered, aes(x = price)) +
+  geom_histogram(bins = 30, fill = "blue", color = "black") +  # Ajustar los contenedores (bins) si es necesario
+  scale_x_continuous(labels = scales::comma) +  # Formatear las etiquetas del eje x con comas
+  labs(title = "Histogram of Prices for Entire Hotel rooms",
+       x = "Price",
+       y = "Count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotar las etiquetas del eje x para mejorar la legibilidad
+
+```
+

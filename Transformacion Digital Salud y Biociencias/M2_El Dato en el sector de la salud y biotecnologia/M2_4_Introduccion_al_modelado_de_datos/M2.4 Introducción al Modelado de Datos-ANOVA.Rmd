@@ -1,0 +1,102 @@
+---
+title: "ANOVA"
+author: "Amaia Telleria"
+date: "2024-05-30"
+output: html_document
+---
+
+
+
+```{r}
+# Load necessary library
+library(stats)
+
+# Create sample data with minimal variation across groups
+set.seed(123)
+data_almost_same <- data.frame(
+  x_column = factor(rep(c("Group A", "Group B", "Group C"), each = 20)),
+  y_column = c(rnorm(20, mean = 5000, sd = 0.1),   # Data for Group A
+               rnorm(20, mean = 50, sd = 0.1),   # Data for Group B
+               rnorm(20, mean = 50, sd = 0.1))   # Data for Group C
+)
+
+# Perform ANOVA
+anova_result_almost_same <- aov(y_column ~ x_column, data = data_almost_same)
+
+# Display the ANOVA table
+anova_summary <- summary(anova_result_almost_same)
+
+# Extract p-value from the ANOVA summary
+# Here we correctly access the summary to extract the p-value
+# We assume 'x_column' is the first term in our ANOVA model
+p_value <- anova_summary[[1]]["Pr(>F)"][1, 1]
+
+# Check if the p-value has been extracted correctly and print results
+if (is.na(p_value)) {
+    cat("Failed to extract p-value.\n")
+} else {
+    cat("The p-value of the ANOVA test is:", p_value, "\n")
+
+    # Interpret the p-value
+    if (p_value < 0.05) {
+        cat("The result is statistically significant, suggesting that there are differences between the group means.\n")
+    } else {
+        cat("The result is not statistically significant, suggesting that there are no differences between the group means.\n")
+    }
+}
+
+
+```
+```{r}
+# Load necessary library
+library(stats)
+
+# Create sample data with minimal variation across two groups
+set.seed(123)
+data_two_groups <- data.frame(
+  x_column = factor(rep(c("Group A", "Group B"), each = 20)),
+  y_column = c(rnorm(20, mean = 5000, sd = 0.1),   # Data for Group A
+               rnorm(20, mean = 50, sd = 0.1))   # Data for Group B
+)
+
+# Perform t-test
+t_test_result <- t.test(y_column ~ x_column, data = data_two_groups)
+
+# Extract p-value from the t-test result
+p_value <- t_test_result$p.value
+
+# Print the results of the t-test
+cat("The p-value of the t-test is:", p_value, "\n")
+
+# Interpret the p-value
+if (p_value < 0.05) {
+    cat("The result is statistically significant, suggesting that there are differences between the group means.\n")
+} else {
+    cat("The result is not statistically significant, suggesting that there are no differences between the group means.\n")
+}
+
+```
+
+```{r}
+# Load necessary library
+library(stats)
+
+# Create sample data with minimal variation across five groups
+set.seed(123)
+data_five_groups <- data.frame(
+  x_column = factor(rep(c("Group A", "Group B", "Group C", "Group D", "Group E"), each = 20)),
+  y_column = c(rnorm(20, mean = 50, sd = 0.1),   # Data for Group A
+               rnorm(20, mean = 50, sd = 0.1),   # Data for Group B
+               rnorm(20, mean = 100, sd = 0.1),   # Data for Group C
+               rnorm(20, mean = 50, sd = 0.1),   # Data for Group D
+               rnorm(20, mean = 50, sd = 0.1))   # Data for Group E
+)
+
+# Perform pairwise t-tests
+pairwise_results <- pairwise.t.test(data_five_groups$y_column, data_five_groups$x_column, p.adjust.method = "none")
+
+# Print the p-value table
+print(pairwise_results$p.value)
+
+```
+

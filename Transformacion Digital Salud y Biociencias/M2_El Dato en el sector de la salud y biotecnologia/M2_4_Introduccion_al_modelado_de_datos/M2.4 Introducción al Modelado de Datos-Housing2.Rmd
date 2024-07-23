@@ -1,0 +1,127 @@
+---
+title: "Housing2"
+author: "Amaia Telleria"
+date: "2024-05-29"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+```{r}
+# Load the data from a CSV file named "Housing.csv"
+housing_data <- read.csv("Housing.csv")
+
+# View the first few rows of the dataset to confirm it's loaded correctly
+head(housing_data)
+```
+
+```{r}
+summary(housing_data)
+```
+
+```{r}
+# Load necessary library
+library(dplyr)
+
+
+# Convert each column to the appropriate data type
+housing_data <- housing_data %>%
+  mutate(
+    price = as.numeric(price),                      # Numeric
+    area = as.numeric(area),                        # Numeric
+    bedrooms = as.factor(bedrooms),                # Discrete Numeric
+    bathrooms = as.factor(bathrooms),              # Discrete Numeric
+    stories = as.factor(stories),                  # Discrete Numeric
+    mainroad = factor(mainroad, levels = c("no", "yes")),  # Categorical (Yes/No)
+    guestroom = factor(guestroom, levels = c("no", "yes")), # Categorical (Yes/No)
+    basement = factor(basement, levels = c("no", "yes")),   # Categorical (Yes/No)
+    hotwaterheating = factor(hotwaterheating, levels = c("no", "yes")), # Categorical (Yes/No)
+    airconditioning = factor(airconditioning, levels = c("no", "yes")), # Categorical (Yes/No)
+    parking = as.factor(parking),                  # Discrete Numeric
+    prefarea = factor(prefarea, levels = c("no", "yes")), # Categorical (Yes/No)
+    furnishingstatus = factor(furnishingstatus, levels = c("unfurnished", "semi-furnished", "furnished")) # Categorical (Label)
+  )
+
+summary(housing_data)
+```
+
+Grafico que muestra correlacion entre area y precio para cada caracteristica
+```{r}
+# Load necessary libraries
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    install.packages("ggplot2")
+}
+library(ggplot2)
+
+if (!requireNamespace("dplyr", quietly = TRUE)) {
+    install.packages("dplyr")
+}
+library(dplyr)
+
+# Function to create scatter plots with trend lines and correlation coefficients
+create_scatter_plots <- function(data, non_numeric_cols, x_col, y_col) {
+    # Check if the input columns are available in the data
+    if (!all(c(x_col, y_col) %in% names(data))) {
+        stop("One or more specified columns are not in the dataset.")
+    }
+
+    # Loop through the specified non-numeric columns
+    for (col in non_numeric_cols) {
+        # Check if the column exists in the data
+        if (!col %in% names(data)) {
+            warning(paste("The column", col, "is not in the dataset. Skipping..."))
+            next
+        }
+
+        # Convert the column to a factor if it's not already
+        data[[col]] <- factor(data[[col]])
+
+        # Calculate correlations for each level of the factor
+        correlations <- data %>%
+            group_by(.data[[col]]) %>%
+            summarize(corr = cor(.data[[x_col]], .data[[y_col]], use = "complete.obs"), .groups = 'drop')
+
+        # Calculate overall correlation
+        overall_corr <- cor(data[[x_col]], data[[y_col]], use = "complete.obs")
+
+        # Add a new column to correlations for y positions
+        max_y <- max(data[[y_col]], na.rm = TRUE)
+        correlations <- correlations %>%
+            mutate(y_pos = seq(from = max_y, by = -0.05 * max_y, length.out = n()),
+                   color = levels(data[[col]]))
+
+        # Generate the plot
+        p <-  ggplot(data, aes_string(x = x_col, y = y_col)) +
+              geom_point(aes_string(color = col)) +
+              geom_smooth(method = "lm", se = FALSE, aes_string(group = col, color = col)) +
+              geom_smooth(method = "lm", se = FALSE, color = "grey") +
+              geom_text(data = correlations, aes(x = Inf, y = y_pos, label = sprintf("r = %.2f", corr), hjust = 1.1, color = color),
+                        inherit.aes = FALSE, parse = FALSE) +
+              geom_text(aes(x = 100, y = Inf, label = sprintf("Overall r = %.2f", overall_corr), hjust = 1.1, vjust = 1),
+                        inherit.aes = FALSE, parse = FALSE, color = "grey") +
+              labs(title = paste("Scatter Plot of", y_col, "vs", x_col, "colored by", col),
+                   x = x_col, y = y_col) +
+              theme_minimal() +
+              theme(legend.position = "bottom")
+
+        print(p)
+    }
+}
+
+# Example usage
+# Assuming 'housing_data' is already loaded
+# Identify non-numeric columns to plot, excluding certain fields if necessary
+non_numeric_columns <- c("bedrooms", "bathrooms", "stories", "mainroad", "guestroom", "basement", "hotwaterheating", "airconditioning", "parking", "prefarea", "furnishingstatus")
+
+create_scatter_plots(housing_data, non_numeric_columns, "area", "price")
+
+
+```
+
+
+
+

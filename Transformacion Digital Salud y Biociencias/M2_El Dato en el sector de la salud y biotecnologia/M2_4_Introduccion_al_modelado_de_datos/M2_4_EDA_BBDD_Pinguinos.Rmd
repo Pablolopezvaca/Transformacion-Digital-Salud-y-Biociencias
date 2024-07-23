@@ -1,0 +1,424 @@
+---
+title: "BBDD_Pinguinos"
+author: "Pablo López Vaca"
+date: "2024-05-28"
+output: html_document
+---
+
+```{r}
+install.packages("palmerpenguins") 
+
+```
+```{r}
+library(palmerpenguins)
+penguins <- penguins
+```
+
+```{r}
+head(penguins)
+```
+
+```{r}
+summary(penguins)
+```
+
+```{r}
+install.packages("dplyr")
+```
+```{r}
+library(dplyr)
+```
+```{r}
+# Mostrar las filas con valores faltantes en cualquier columna
+rows_with_nas <- penguins %>%
+  filter(rowSums(is.na(.)) > 0)
+
+# Imprimir las filas con valores faltantes
+print(rows_with_nas)
+```
+```{r}
+# Excluir las filas con valores faltantes usando na.omit()
+penguins_no_na <- na.omit(penguins)
+
+# Mostrar el dataframe sin valores faltantes
+print(penguins_no_na)
+
+```
+```{r}
+# Mostrar las filas con valores faltantes en cualquier columna
+rows_with_nas <- penguins[complete.cases(penguins) == FALSE, ]
+
+# Imprimir las filas con valores faltantes
+print(rows_with_nas)
+```
+
+```{r}
+# Excluir filas con valores faltantes en cualquier columna excepto en 'sex'
+rows_without_nas_except_sex <- penguins[complete.cases(penguins) | (!is.na(penguins$sex)), ]
+
+# Imprimir las filas filtradas
+print(rows_without_nas_except_sex)
+
+```
+
+```{r}
+library(ggplot2)
+
+# Gráfico de dispersión de bill_length_mm vs bill_depth_mm
+ggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
+  geom_point() +
+  labs(title = "Longitud del Pico vs Profundidad del Pico", x = "Longitud del Pico (mm)", y = "Profundidad del Pico (mm)")
+
+# Boxplot de body_mass_g por especie
+ggplot(penguins, aes(x = species, y = body_mass_g, fill = species)) +
+  geom_boxplot() +
+  labs(title = "Masa Corporal por Especie", x = "Especie", y = "Masa Corporal (g)")
+
+```
+```{r}
+library(ggplot2)
+
+# Gráfico de dispersión de bill_length_mm vs bill_depth_mm con recta de regresión
+ggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +  # Agregar la línea de regresión
+  labs(title = "Longitud del Pico vs Profundidad del Pico", 
+       x = "Longitud del Pico (mm)", 
+       y = "Profundidad del Pico (mm)")
+
+```
+```{r}
+# Calcular matriz de correlación
+correlation_matrix <- cor(select(penguins_no_na, -c(species, island, sex, year)))
+
+# Mostrar la matriz de correlación
+print(correlation_matrix)
+
+```
+```{r}
+library(ggplot2)
+library(tidyr)  # Cargar la librería tidyr
+
+# Calcular la matriz de correlación
+correlation_matrix <- cor(select(penguins, -c(species, island, sex, year)))
+
+# Crear el gráfico de dispersión de bill_length_mm vs bill_depth_mm
+scatter_plot <- ggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
+  geom_point() +
+  labs(title = "Longitud del Pico vs Profundidad del Pico", x = "Longitud del Pico (mm)", y = "Profundidad del Pico (mm)")
+
+# Crear el boxplot de body_mass_g por especie
+boxplot <- ggplot(penguins, aes(x = species, y = body_mass_g, fill = species)) +
+  geom_boxplot() +
+  labs(title = "Masa Corporal por Especie", x = "Especie", y = "Masa Corporal (g)")
+
+# Crear el gráfico de la matriz de correlación
+correlation_plot <- ggplot(data = gather(as.data.frame(correlation_matrix), key = "Var2", value = "value"), 
+                           aes(Var1, Var2, fill = value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, limit = c(-1,1), space = "Lab", name="Correlation") +
+  labs(title = "Matriz de Correlación") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, size = 10, hjust = 1))
+
+# Mostrar los gráficos juntos
+library(gridExtra)
+grid.arrange(scatter_plot, boxplot, correlation_plot, ncol = 3)
+
+
+```
+```{r}
+install.packages("reshape2")
+```
+
+```{r}
+install.packages("tidyr")
+```
+
+```{r}
+install.packages("reshape2")  # Instalar la librería reshape2 si aún no está instalada
+library(reshape2)  # Cargar la librería reshape2
+
+```
+
+```{r}
+install.packages("tidyr")  # Instalar la librería tidyr
+
+```
+
+```{r}
+# Calcular la matriz de correlación
+correlation_matrix <- cor(select(penguins, -c(species, island, sex, year)))
+
+# Crear el gráfico de dispersión de bill_length_mm vs bill_depth_mm
+scatter_plot <- ggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
+  geom_point() +
+  labs(title = "Longitud del Pico vs Profundidad del Pico", x = "Longitud del Pico (mm)", y = "Profundidad del Pico (mm)")
+
+# Crear el boxplot de body_mass_g por especie
+boxplot <- ggplot(penguins, aes(x = species, y = body_mass_g, fill = species)) +
+  geom_boxplot() +
+  labs(title = "Masa Corporal por Especie", x = "Especie", y = "Masa Corporal (g)")
+
+# Crear el gráfico de la matriz de correlación
+correlation_plot <- ggplot(data = gather(as.data.frame(correlation_matrix), key = "Var2", value = "value"), 
+                           aes(Var1, Var2, fill = value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, limit = c(-1,1), space = "Lab", name="Correlation") +
+  labs(title = "Matriz de Correlación") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, size = 10, hjust = 1))
+
+# Mostrar los gráficos juntos
+library(gridExtra)
+grid.arrange(scatter_plot, boxplot, correlation_plot, ncol = 3)
+```
+
+```{r}
+install.packages("reshape2")  # Instalar la librería reshape2
+
+```
+
+```{r}
+install.packages("dplyr")
+```
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+
+library(ggplot2)
+library(reshape2)  # Cargar la librería reshape2 para melt
+
+# Calcular matriz de correlación
+correlation_matrix <- cor(select(penguins_no_na, -c(species, island, sex, year)))
+
+# Convertir la matriz de correlación en un dataframe
+correlation_df <- as.data.frame(correlation_matrix)
+
+# Convertir la matriz de correlación en formato largo
+correlation_df_long <- melt(correlation_df)
+
+# Crear el gráfico de matriz de correlación
+correlation_plot <- ggplot(data = correlation_df_long, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, limit = c(-1, 1), name = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+# Mostrar el gráfico
+print(correlation_plot)
+
+
+```
+
+```{r}
+# Inspeccionar el dataframe correlation_df_long
+print(head(correlation_df_long))
+
+```
+
+```{r}
+# Crear el gráfico de matriz de correlación
+correlation_plot <- ggplot(data = correlation_df_long, aes(x = variable, y = variable, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, limit = c(-1, 1), name = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+# Mostrar el gráfico
+print(correlation_plot)
+
+```
+
+```{r}
+library(ggplot2)
+
+# Calcular matriz de correlación
+correlation_matrix <- cor(select(penguins_no_na, -c(species, island, sex, year)))
+
+# Convertir la matriz de correlación en un dataframe
+correlation_df <- as.data.frame(correlation_matrix)
+
+# Convertir la matriz de correlación en formato largo
+correlation_df_long <- as.data.frame(as.table(correlation_df))
+
+# Renombrar las columnas del dataframe largo
+colnames(correlation_df_long) <- c("variable1", "variable2", "correlation")
+
+# Crear el gráfico de matriz de correlación
+correlation_plot <- ggplot(correlation_df_long, aes(x = variable1, y = variable2, fill = correlation)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, name = "Correlation") +
+  labs(title = "Matriz de Correlación") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+# Mostrar el gráfico
+print(correlation_plot)
+
+```
+```{r}
+library(ggplot2)
+library(reshape2)  # Cargar la librería reshape2
+
+# Calcular matriz de correlación
+correlation_matrix <- cor(select(penguins_no_na, -c(species, island, sex, year)))
+
+# Convertir la matriz de correlación en un dataframe
+correlation_df <- as.data.frame(correlation_matrix)
+
+# Convertir la matriz de correlación en un dataframe largo
+correlation_df_long <- melt(correlation_df)
+
+# Renombrar las columnas del dataframe largo
+colnames(correlation_df_long) <- c("variable1", "variable2", "correlation")
+
+# Crear el gráfico de matriz de correlación
+correlation_plot <- ggplot(correlation_df_long, aes(x = variable1, y = variable2, fill = correlation)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, name = "Correlation") +
+  labs(title = "Matriz de Correlación") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+# Mostrar el gráfico
+print(correlation_plot)
+
+```
+```{r}
+library(ggplot2)
+library(reshape2)  # Cargar la librería reshape2
+
+# Calcular matriz de correlación
+correlation_matrix <- cor(select(penguins_no_na, -c(species, island, sex, year)))
+
+# Convertir la matriz de correlación en un dataframe
+correlation_df <- as.data.frame(correlation_matrix)
+
+# Convertir la matriz de correlación en un dataframe largo
+correlation_df_long <- melt(correlation_df)
+
+# Crear el gráfico de matriz de correlación
+correlation_plot <- ggplot(correlation_df_long, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, name = "Correlation") +
+  labs(title = "Matriz de Correlación") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+# Mostrar el gráfico
+print(correlation_plot)
+
+```
+
+```{r}
+library(ggplot2)
+library(reshape2)  # Cargar la librería reshape2
+
+# Calcular matriz de correlación
+correlation_matrix <- cor(select(penguins_no_na, -c(species, island, sex, year)))
+
+# Convertir la matriz de correlación en un dataframe
+correlation_df <- as.data.frame(correlation_matrix)
+
+# Convertir la matriz de correlación en un dataframe largo
+correlation_df_long <- melt(correlation_df, varnames = c("Var1", "Var2"))
+
+# Crear el gráfico de matriz de correlación
+correlation_plot <- ggplot(correlation_df_long, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, name = "Correlation") +
+  labs(title = "Matriz de Correlación") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+# Mostrar el gráfico
+print(correlation_plot)
+
+```
+
+```{r}
+str(correlation_df_long)
+```
+
+```{r}
+library(ggplot2)
+library(reshape2)  # Cargar la librería reshape2
+
+# Calcular matriz de correlación
+correlation_matrix <- cor(select(penguins_no_na, -c(species, island, sex, year)))
+
+# Convertir la matriz de correlación en un dataframe
+correlation_df <- as.data.frame(correlation_matrix)
+
+# Convertir la matriz de correlación en un dataframe largo
+correlation_df_long <- melt(correlation_df)
+
+# Crear el gráfico de matriz de correlación
+correlation_plot <- ggplot(correlation_df_long, aes(x = variable, y = variable, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, name = "Correlation") +
+  labs(title = "Matriz de Correlación") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+# Mostrar el gráfico
+print(correlation_plot)
+
+```
+
+```{r}
+library(ggplot2)
+library(reshape2)  
+
+# Calcular matriz de correlación
+correlation_matrix <- cor(select(penguins_no_na, -c(species, island, sex, year)))
+
+# Convertir la matriz de correlación en un dataframe
+correlation_df <- as.data.frame(correlation_matrix)
+
+# Convertir la matriz de correlación en un dataframe largo
+correlation_df_long <- melt(correlation_df)
+
+# Crear el gráfico de matriz de correlación
+correlation_plot <- ggplot(correlation_df_long, aes(x = bill_length_mm, y = bill_depth_mm, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, name = "Correlation") +
+  labs(title = "Matriz de Correlación") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+# Mostrar el gráfico
+print(correlation_plot)
+
+```
+
+```{r}
+library(ggplot2)
+library(reshape2)  
+
+# Calcular matriz de correlación
+correlation_matrix <- cor(select(penguins_no_na, -c(species, island, sex, year)))
+
+# Convertir la matriz de correlación en un dataframe
+correlation_df <- as.data.frame(correlation_matrix)
+
+# Convertir la matriz de correlación en un dataframe largo
+correlation_df_long <- melt(correlation_df)
+
+# Crear el gráfico de matriz de correlación
+correlation_plot <- ggplot(correlation_df_long, aes(x = variable, y = variable, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, name = "Correlation") +
+  labs(title = "Matriz de Correlación") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+# Mostrar el gráfico
+print(correlation_plot)
+
+```
+

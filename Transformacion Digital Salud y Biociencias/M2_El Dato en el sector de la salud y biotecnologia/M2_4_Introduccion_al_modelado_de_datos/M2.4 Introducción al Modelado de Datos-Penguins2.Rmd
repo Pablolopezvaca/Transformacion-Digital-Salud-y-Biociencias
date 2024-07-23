@@ -1,0 +1,369 @@
+---
+title: "Pinguinos"
+author: "Amaia Telleria"
+date: "2024-05-28"
+output: html_document
+---
+
+
+
+```{r}
+library(corrplot)
+library(dplyr)
+```
+
+
+
+```{r}
+library(palmerpenguins)
+penguins <- penguins 
+```
+
+
+```{r}
+head(penguins)
+```
+```{r}
+summary(penguins)
+```
+
+
+```{r}
+
+# Load necessary libraries
+library(palmerpenguins)
+
+# Access the penguins dataset
+data("penguins")
+
+# Remove rows with NA values to avoid division by zero or missing value errors
+penguins <- na.omit(penguins)
+
+# Explicitly create each division column
+penguins$body_mass_div_bill_length <- penguins$body_mass_g / penguins$bill_length_mm
+penguins$body_mass_div_bill_depth <- penguins$body_mass_g / penguins$bill_depth_mm
+penguins$body_mass_div_flipper_length <- penguins$body_mass_g / penguins$flipper_length_mm
+
+penguins$bill_length_div_bill_depth <- penguins$bill_length_mm / penguins$bill_depth_mm
+penguins$bill_length_div_flipper_length <- penguins$bill_length_mm / penguins$flipper_length_mm
+
+penguins$bill_depth_div_flipper_length <- penguins$bill_depth_mm / penguins$flipper_length_mm
+
+# Optionally, display the head of the DataFrame to see the new columns
+head(penguins)
+
+
+```
+
+```{r}
+# Select only numeric variables and exclude 'year'
+numeric_data <- penguins %>% 
+  select(where(is.numeric)) %>% 
+  select(-year)  # Exclude the 'year' column
+
+# Calculate the correlation matrix, handling NAs appropriately
+cor_matrix <- cor(numeric_data, use = "pairwise.complete.obs")
+print(cor_matrix)
+
+# Visualize the correlation matrix
+corrplot(cor_matrix, method = "circle", order = "hclust", 
+         tl.col = "darkblue", tl.srt = 45,  # Text label options
+         addCoef.col = "grey", # Color of the correlation coefficients
+         number.cex = 0.5)      # Size of the correlation coefficients
+
+# Calculate the correlation matrix, handling NAs appropriately
+M <- cor(numeric_data, use = "pairwise.complete.obs")
+```
+
+```{r}
+# Load necessary libraries
+library(palmerpenguins)
+library(corrplot)
+
+# Ensure penguins dataset is loaded and remove rows with NA values
+data("penguins")
+penguins <- na.omit(penguins)
+
+# Create division columns with the desired format for names
+penguins$`largo de aleta / peso` <- penguins$flipper_length_mm / penguins$body_mass_g
+penguins$`largo de pico / peso` <- penguins$bill_length_mm / penguins$body_mass_g
+penguins$`ancho de pico / peso` <- penguins$bill_depth_mm / penguins$body_mass_g
+penguins$`largo de pico / ancho de pico`<- penguins$bill_length_mm / penguins$bill_depth_mm
+penguins$`largo de pico / largo de aleta` <- penguins$bill_length_mm / penguins$flipper_length_mm
+penguins$`ancho de pico / largo de aleta` <- penguins$bill_depth_mm / penguins$flipper_length_mm
+
+# Rename original columns to Spanish for consistency
+names(penguins)[names(penguins) == "flipper_length_mm"] <- "largo de aleta"
+names(penguins)[names(penguins) == "body_mass_g"] <- "peso"
+names(penguins)[names(penguins) == "bill_length_mm"] <- "largo de pico"
+names(penguins)[names(penguins) == "bill_depth_mm"] <- "ancho de pico"
+
+# Select all numeric columns for correlation, including new division columns
+numeric_columns <- c("peso", "largo de aleta", "ancho de pico", "largo de pico", 
+                     "largo de aleta / peso", "largo de pico / peso", "ancho de pico / peso","largo de pico / ancho de pico","largo de pico / largo de aleta","ancho de pico / largo de aleta")
+cor_matrix <- cor(penguins[, numeric_columns, drop = FALSE])
+
+# Visualize the correlation matrix
+corrplot(cor_matrix, method = "circle", order = "hclust",
+         tl.col = "darkblue",   # Text label color
+         tl.srt = 45,           # Text label rotation
+         addCoef.col = "grey",  # Correlation coefficient color
+         number.cex = 0.5,      # Size of the correlation coefficients
+         tl.cex = 0.6)          # Text size of the labels for better readability
+
+```
+
+
+
+Diagrama de puntos marcados por sexo
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(palmerpenguins)
+
+# Load and prepare the dataset
+data("penguins")
+penguins <- na.omit(penguins)  # Remove rows with NA values except in 'sex'
+penguins$sex[is.na(penguins$sex)] <- "Unknown"  # Replace NA in 'sex' with 'Unknown'
+
+# List of numeric variables for correlation
+variables <- c("bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g")
+
+# Loop through each pair of numeric variables and create a plot
+for (i in 1:length(variables)) {
+  for (j in (i+1):length(variables)) {
+    # Calculate correlation value
+    cor_value <- cor(penguins[[variables[i]]], penguins[[variables[j]]], use = "complete.obs")
+    
+    # Generate the plot
+    p <- ggplot(penguins, aes_string(x = variables[i], y = variables[j], color = "sex")) +
+      geom_point(size = 3) +
+      scale_color_manual(values = c("male" = "blue", "female" = "red", "Unknown" = "grey")) +  # Color scale for sex
+      geom_smooth(method = "lm", se = FALSE, color = "black") +  # Trend line
+      geom_text(aes(label = sprintf("Correlation: %.2f", cor_value)), 
+                x = Inf, y = Inf, hjust = 1.1, vjust = 1.1, size = 3, color = "grey") +  # Correlation text
+      labs(title = paste("Correlation between", variables[i], "and", variables[j]),
+           x = variables[i],
+           y = variables[j]) +
+      theme_minimal()
+
+    # Print the plot
+    print(p)
+  }
+}
+
+```
+Diagrama marcado por especie (identificar grupos)
+```{r}
+library(ggplot2)
+
+cor_value <- cor(penguins$flipper_length_mm, penguins$body_mass_g, use = "complete.obs")
+
+ggplot(penguins, aes(x = bill_depth_mm, y = body_mass_g)) +
+  geom_point(aes(color = species), size = 3) +  # Puntos coloreados por especie
+  geom_smooth(method = "lm", se = FALSE) +  # Línea de tendencia lineal sin intervalo de confianza
+  geom_text(aes(label = sprintf("Correlation: %.2f", cor_value)), 
+            x = Inf, y = Inf, hjust = 1.1, vjust = 1.1, size = 3, color = "grey") +
+  labs(title = "Correlación entre Longitud de Aleta y Peso",
+       x = "Longitud de Aleta (mm)",
+       y = "Peso  (g)") +
+  theme_minimal()
+```
+Cear dataframes de G y A/C
+```{r}
+# Load necessary libraries
+library(palmerpenguins)
+
+# Load the dataset
+data("penguins")
+
+# Ensure the data is clean by removing any rows with missing values
+penguins <- na.omit(penguins)
+
+# Create a dataframe with only Gentoo penguins
+gentoo_df <- subset(penguins, species == "Gentoo")
+
+# Create a dataframe with both Chinstrap and Adelie penguins
+chinstrap_adelie_df <- subset(penguins, species %in% c("Chinstrap", "Adelie"))
+
+```
+
+Lineas de tendencia marcadas por sexo de G
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(ggpubr)  # Load ggpubr for regression line equations
+library(palmerpenguins)
+
+# Assume gentoo_df is already created as a subset with only Gentoo species
+# Prepare the dataset
+penguins <- na.omit(gentoo_df, select = -sex)  # Remove rows with NA values except in 'sex'
+penguins$sex[is.na(penguins$sex)] <- "Unknown"  # Replace NA in 'sex' with 'Unknown'
+penguins$sex <- factor(penguins$sex)  # Convert 'sex' to a factor for proper coloring
+
+# List of numeric variables for correlation
+variables <- c("bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g")
+
+# Loop through each pair of numeric variables and create a plot
+for (i in 1:length(variables)) {
+  for (j in (i+1):length(variables)) {
+    # Calculate correlation value
+    cor_value <- cor(penguins[[variables[i]]], penguins[[variables[j]]], use = "complete.obs")
+    
+    # Generate the plot
+    p <- ggplot(penguins, aes(x = get(variables[i]), y = get(variables[j]), color = sex)) +
+      geom_point(size = 3) +
+      scale_color_manual(values = c("male" = "blue", "female" = "red", "Unknown" = "grey")) +  # Color scale for sex
+      geom_smooth(method = "lm", se = FALSE, color = "black") +  # Trend line
+      stat_regline_equation(label.x = Inf, label.y = Inf, hjust = 1.1, vjust = 2, aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), color = "black") +  # Regression line equation
+      geom_text(aes(label = sprintf("Correlation: %.2f", cor_value)), 
+                x = Inf, y = Inf, hjust = 1.1, vjust = 1.1, size = 3, color = "grey") +  # Correlation text
+      labs(title = paste(" Gentoo Correlation between", variables[i], "and", variables[j]),
+           x = variables[i],
+           y = variables[j]) +
+      theme_minimal()
+
+    # Print the plot
+    print(p)
+  }
+}
+
+```
+
+Lineas de tendencia marcadas por sexo de C y A
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(ggpubr)  # Load ggpubr for regression line equations
+library(palmerpenguins)
+
+# Assume gentoo_df is already created as a subset with only Gentoo species
+# Prepare the dataset
+penguins <- na.omit(chinstrap_adelie_df, select = -sex)  # Remove rows with NA values except in 'sex'
+penguins$sex[is.na(penguins$sex)] <- "Unknown"  # Replace NA in 'sex' with 'Unknown'
+penguins$sex <- factor(penguins$sex)  # Convert 'sex' to a factor for proper coloring
+
+# List of numeric variables for correlation
+variables <- c("bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g")
+
+# Loop through each pair of numeric variables and create a plot
+for (i in 1:length(variables)) {
+  for (j in (i+1):length(variables)) {
+    # Calculate correlation value
+    cor_value <- cor(penguins[[variables[i]]], penguins[[variables[j]]], use = "complete.obs")
+    
+    # Generate the plot
+    p <- ggplot(penguins, aes(x = get(variables[i]), y = get(variables[j]), color = sex)) +
+      geom_point(size = 3) +
+      scale_color_manual(values = c("male" = "blue", "female" = "red", "Unknown" = "grey")) +  # Color scale for sex
+      geom_smooth(method = "lm", se = FALSE, color = "black") +  # Trend line
+      stat_regline_equation(label.x = Inf, label.y = Inf, hjust = 1.1, vjust = 2, aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), color = "black") +  # Regression line equation
+      geom_text(aes(label = sprintf("Correlation: %.2f", cor_value)), 
+                x = Inf, y = Inf, hjust = 1.1, vjust = 1.1, size = 3, color = "grey") +  # Correlation text
+      labs(title = paste(" C y A Correlation between", variables[i], "and", variables[j]),
+           x = variables[i],
+           y = variables[j]) +
+      theme_minimal()
+
+    # Print the plot
+    print(p)
+  }
+}
+
+```
+
+
+Boxplot de poblacion G
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(palmerpenguins)
+
+# Assume gentoo_df is already created as a subset with only Gentoo species
+# Prepare the dataset
+penguins <- na.omit(gentoo_df, select = -sex)  # Remove rows with NA values except in 'sex'
+penguins$sex[is.na(penguins$sex)] <- "Unknown"  # Replace NA in 'sex' with 'Unknown'
+penguins$sex <- factor(penguins$sex)  # Convert 'sex' to a factor for proper coloring
+
+# List of numeric variables for creating boxplots
+variables <- c("bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g")
+
+# Loop through each numeric variable and create a boxplot
+for (variable in variables) {
+    # Generate the boxplot
+    p <- ggplot(penguins, aes(x = sex, y = get(variable), fill = sex)) +
+      geom_boxplot() +
+      scale_fill_manual(values = c("male" = "blue", "female" = "red", "Unknown" = "grey")) +  # Color scale for sex
+      labs(title = paste("Gentoo Boxplot of", variable, "by Sex"),
+           x = "Sex",
+           y = variable) +
+      theme_minimal()
+
+    # Print the plot
+    print(p)
+}
+
+```
+Boxplot de poblaciones C y A
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(palmerpenguins)
+
+# Assume gentoo_df is already created as a subset with only Gentoo species
+# Prepare the dataset
+penguins <- na.omit(chinstrap_adelie_df, select = -sex)  # Remove rows with NA values except in 'sex'
+penguins$sex[is.na(penguins$sex)] <- "Unknown"  # Replace NA in 'sex' with 'Unknown'
+penguins$sex <- factor(penguins$sex)  # Convert 'sex' to a factor for proper coloring
+
+# List of numeric variables for creating boxplots
+variables <- c("bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g")
+
+# Loop through each numeric variable and create a boxplot
+for (variable in variables) {
+    # Generate the boxplot
+    p <- ggplot(penguins, aes(x = sex, y = get(variable), fill = sex)) +
+      geom_boxplot() +
+      scale_fill_manual(values = c("male" = "blue", "female" = "red", "Unknown" = "grey")) +  # Color scale for sex
+      labs(title = paste("C and A Boxplot of", variable, "by Sex"),
+           x = "Sex",
+           y = variable) +
+      theme_minimal()
+
+    # Print the plot
+    print(p)
+}
+
+```
+
+Boxplots por sexo de poblacion completa
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(palmerpenguins)
+
+# Assume gentoo_df is already created as a subset with only Gentoo species
+# Prepare the dataset
+penguins <- na.omit(penguins, select = -sex)  # Remove rows with NA values except in 'sex'
+penguins$sex[is.na(penguins$sex)] <- "Unknown"  # Replace NA in 'sex' with 'Unknown'
+penguins$sex <- factor(penguins$sex)  # Convert 'sex' to a factor for proper coloring
+
+# List of numeric variables for creating boxplots
+variables <- c("bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g")
+
+# Loop through each numeric variable and create a boxplot
+for (variable in variables) {
+    # Generate the boxplot
+    p <- ggplot(penguins, aes(x = sex, y = get(variable), fill = sex)) +
+      geom_boxplot() +
+      scale_fill_manual(values = c("male" = "blue", "female" = "red", "Unknown" = "grey")) +  # Color scale for sex
+      labs(title = paste("General Boxplot of", variable, "by Sex"),
+           x = "Sex",
+           y = variable) +
+      theme_minimal()
+
+    # Print the plot
+    print(p)
+}
+
+```
